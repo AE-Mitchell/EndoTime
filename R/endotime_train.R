@@ -8,11 +8,12 @@
 #' @param aggregate_window ...
 #' @param euc ...
 #' @param enforce_monotony ...
+#' @param decreasing_window ...
 #'
 #' @return ...
 #' @export
 endotime_train <- function(expression_data, genes, batch_correct = TRUE, check_asynchrony = TRUE, gene_window = 80, aggregate_window = 80, euc = 2,
-                           enforce_monotony = FALSE) {
+                           enforce_monotony = FALSE, decreasing_window = FALSE) {
     set.seed(101)
 
     result <- list()
@@ -41,7 +42,7 @@ endotime_train <- function(expression_data, genes, batch_correct = TRUE, check_a
     even_tps <- seq(min(expression_data[, "LH"]), max(expression_data[, "LH"]), length.out = nrow(expression_data))
     training_model_results <- .endometrium_ordering(expression_data = expression_data, even_tps = even_tps,
                                                    genes = genes, gene_window = gene_window, aggregate_window = aggregate_window,
-                                                   spread = 11, euc = 2)
+                                                   spread = 11, euc = 2, decreasing_window = decreasing_window)
 
     result[["expression_data"]] <- expression_data
     result[["model_results"]] <- training_model_results

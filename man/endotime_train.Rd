@@ -12,7 +12,8 @@ endotime_train(
   gene_window = 80,
   aggregate_window = 80,
   euc = 2,
-  enforce_monotony = FALSE
+  enforce_monotony = FALSE,
+  decreasing_window = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ endotime_train(
 \item{euc}{...}
 
 \item{enforce_monotony}{...}
+
+\item{decreasing_window}{...}
 }
 \value{
 ...
