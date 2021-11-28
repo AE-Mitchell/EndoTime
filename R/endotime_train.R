@@ -27,22 +27,9 @@ endotime_train <- function(expression_data, genes, batch_correct = TRUE, check_a
     result[["gene_scaling"]] <- gene_scaling_info
     expression_data <- cbind(expression_data[, 1:4], t(sapply(1:dim(expression_data)[1], function(x) .scale_sample(expression_data[x, ], genes, gene_scaling_info))))
 
+    # 3) Correct for batch effect
     if (batch_correct) {
-        # 3) Correct for batch effect
-        batch_means <- c()
-
-        for (i in as.numeric(levels(factor(expression_data$BATCH)))) {
-            subset_df <- expression_data[expression_data[["BATCH"]] == i, ]
-            batch_means <- c(batch_means, mean(unlist(subset_df[, genes])))
-        }
-
-        correction <- c()
-        correction[as.numeric(levels(factor(expression_data$BATCH)))] <- max(batch_means) - batch_means
-        corrected <- expression_data[, genes] + correction[expression_data[, "BATCH"]]
-        expression_data <- cbind(expression_data[, c("ID", "BATCH", "LH", "LH_rn")], corrected)
-        rownames(expression_data) <- expression_data[, "ID"]
-
-        result[["batch_correction"]] <- max(batch_means)
+        expression_data <- .batch_correct(expression_data, genes)
     }
 
     # 3) run the training model
