@@ -11,7 +11,8 @@ endotime_train(
   check_asynchrony = TRUE,
   gene_window = 80,
   aggregate_window = 80,
-  euc = 2
+  euc = 2,
+  enforce_monotony = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ endotime_train(
 \item{aggregate_window}{...}
 
 \item{euc}{...}
+
+\item{enforce_monotony}{...}
 }
 \value{
 ...

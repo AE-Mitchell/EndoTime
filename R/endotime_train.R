@@ -7,18 +7,23 @@
 #' @param gene_window ...
 #' @param aggregate_window ...
 #' @param euc ...
+#' @param enforce_monotony ...
 #'
 #' @return ...
 #' @export
-endotime_train <- function(expression_data, genes, batch_correct = TRUE, check_asynchrony = TRUE, gene_window = 80, aggregate_window = 80, euc = 2) {
+endotime_train <- function(expression_data, genes, batch_correct = TRUE, check_asynchrony = TRUE, gene_window = 80, aggregate_window = 80, euc = 2,
+                           enforce_monotony = FALSE) {
     set.seed(101)
 
     result <- list()
 
     # 1) Read in the data, add random noise to LH+ values and invert delta-CT values to reflect expression
-    expression_data <- as.data.frame(expression_data)
-    expression_data[, "LH_rn"] <- expression_data[, "LH"] + stats::runif(nrow(expression_data), -0.5, 0.5)
-    expression_data[, "ID"] <- as.vector(expression_data[, "ID"])
+    if (enforce_monotony) {
+        expression_data <- .enforce_monotony(expression_data)
+    } else {
+        expression_data["LH_rn"] <- expression_data[["LH"]] + stats::runif(nrow(expression_data), -0.5, 0.5)
+    }
+
     expression_data <- cbind(expression_data[, c("ID", "BATCH", "LH", "LH_rn")], expression_data[, genes] * -1)
 
     # 2) Scale genes
