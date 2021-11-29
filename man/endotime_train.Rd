@@ -13,7 +13,8 @@ endotime_train(
   aggregate_window = 80,
   euc = 2,
   enforce_monotony = FALSE,
-  decreasing_window = FALSE
+  decreasing_window = FALSE,
+  new_extrap = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ endotime_train(
 \item{enforce_monotony}{...}
 
 \item{decreasing_window}{...}
+
+\item{new_extrap}{...}
 }
 \value{
 ...
