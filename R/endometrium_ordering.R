@@ -13,10 +13,20 @@
 
     extrapolated_data <- rbind(expression_data[, c("ID", "LH_rn", genes)], fake_points[, c("ID", "LH_rn", genes)])
 
+    new_assignments <- c()
+
     for (i in samples) {
         a <- .all_genes(unknown_sample = i, genes = genes, data_dCT = extrapolated_data, gene_window = gene_window)
-        b <- .all_genes_aggregate(unknown_sample = i, all_genes_result = a, aggregate_window = aggregate_window)
-        new_assignments <- c(new_assignments, b)
+
+        a <- as.data.frame(a)
+
+        # NB: This process extends expression into the negative values. However, as we're taking the average per bin,
+        # it should balance out
+        extrapolated_densities <- .extrapolate_aggregate(a, genes, aggregate_window)
+
+        density_bins <- .aggregate_calc(extrapolated_densities, aggregate_window, genes)
+
+        new_assignments <- c(new_assignments, density_bins[which.max(density_bins[["mean_exp"]]), "median_lh"])
     }
 
     raw_assignments <- new_assignments

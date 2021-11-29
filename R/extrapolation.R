@@ -1,4 +1,5 @@
 .extrapolation <- function(dat, genes, size, dp_per_LH = 33) {
+    size <- size / 2
     addition <- 1 / dp_per_LH
     upper_boundary_LH <- max(dat[, "LH_rn"]) + (c(1:size) * addition)
     lower_boundary_LH <- min(dat[, "LH_rn"]) - (c(1:size) * addition)
