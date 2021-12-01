@@ -10,12 +10,12 @@
 #' @param enforce_monotony ...
 #' @param decreasing_window ...
 #' @param new_extrap ...
+#' @param convert_realtime ...
 #'
 #' @return ...
 #' @export
 endotime_train <- function(expression_data, genes, batch_correct = TRUE, check_asynchrony = TRUE, gene_window = 80, aggregate_window = 80, euc = 2,
-                           enforce_monotony = FALSE, decreasing_window = FALSE, new_extrap = FALSE) {
-    set.seed(101)
+                           enforce_monotony = FALSE, decreasing_window = FALSE, new_extrap = FALSE, convert_realtime = TRUE) {
 
     result <- list()
 
@@ -64,6 +64,10 @@ endotime_train <- function(expression_data, genes, batch_correct = TRUE, check_a
         threshold <- sort(asynchrony)[break1 - 1]
         result[["asynchronous_scores"]] <- asynchrony
         result[["asynchrony_threshold"]] <- threshold
+    }
+
+    if (convert_realtime) {
+        result <- .convert_realtime(result)
     }
 
     return(result)

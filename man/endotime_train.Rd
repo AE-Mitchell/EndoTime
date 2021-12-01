@@ -14,7 +14,8 @@ endotime_train(
   euc = 2,
   enforce_monotony = FALSE,
   decreasing_window = FALSE,
-  new_extrap = FALSE
+  new_extrap = FALSE,
+  convert_realtime = TRUE
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ endotime_train(
 \item{decreasing_window}{...}
 
 \item{new_extrap}{...}
+
+\item{convert_realtime}{...}
 }
 \value{
 ...

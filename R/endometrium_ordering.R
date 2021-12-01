@@ -6,7 +6,7 @@
     new_assignments <- c()
 
     if (new_extrap) {
-        fake_points <- .extrapolate_data_2(expression_data, genes, gene_window, iteration)
+        fake_points <- .extrapolate_data(expression_data, genes, gene_window, iteration)
     } else {
         fake_points <- .extrapolation(dat = expression_data, genes = genes, size = gene_window, dp_per_LH = spread)
     }
