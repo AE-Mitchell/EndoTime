@@ -1,9 +1,9 @@
-.single_gene <- function(unknown_sample, gene_name, data_dCT, gene_window) {
-    unknown_row <- which(data_dCT[, "ID"] == unknown_sample)
-    unknown_expression <- data_dCT[unknown_row, gene_name]
-    rest_rows <- which(data_dCT[, "ID"] != unknown_sample)
-    rest_LH <- data_dCT[rest_rows, "LH_rn"][order(data_dCT[rest_rows, "LH_rn"])]
-    rest_gene <- data_dCT[rest_rows, gene_name][order(data_dCT[rest_rows, "LH_rn"])]
+.single_gene <- function(unknown_sample, gene_name, expression_data, gene_window) {
+    unknown_row <- which(expression_data[, "ID"] == unknown_sample)
+    unknown_expression <- expression_data[unknown_row, gene_name]
+    rest_rows <- which(expression_data[, "ID"] != unknown_sample)
+    rest_LH <- expression_data[rest_rows, "LH_rn"][order(expression_data[rest_rows, "LH_rn"])]
+    rest_gene <- expression_data[rest_rows, gene_name][order(expression_data[rest_rows, "LH_rn"])]
     medians <- c()
     densities <- c()
 

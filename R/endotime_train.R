@@ -7,24 +7,15 @@
 #' @param gene_window ...
 #' @param aggregate_window ...
 #' @param euc ...
-#' @param enforce_monotony ...
-#' @param decreasing_window ...
-#' @param new_extrap ...
-#' @param convert_realtime ...
 #'
 #' @return ...
 #' @export
-endotime_train <- function(expression_data, genes, batch_correct = TRUE, check_asynchrony = TRUE, gene_window = 80, aggregate_window = 80, euc = 2,
-                           enforce_monotony = FALSE, decreasing_window = FALSE, new_extrap = FALSE, convert_realtime = TRUE) {
+endotime_train <- function(expression_data, genes, batch_correct = TRUE, check_asynchrony = TRUE, gene_window = 80, aggregate_window = 80, euc = 2) {
 
     result <- list()
 
     # 1) Read in the data, add random noise to LH+ values and invert delta-CT values to reflect expression
-    if (enforce_monotony) {
-        expression_data <- .enforce_monotony(expression_data)
-    } else {
-        expression_data["LH_rn"] <- expression_data[["LH"]] + stats::runif(nrow(expression_data), -0.5, 0.5)
-    }
+    expression_data <- .enforce_monotony(expression_data)
 
     expression_data <- cbind(expression_data[, c("ID", "BATCH", "LH", "LH_rn")], expression_data[, genes] * -1)
 
@@ -41,19 +32,17 @@ endotime_train <- function(expression_data, genes, batch_correct = TRUE, check_a
 
     # 3) run the training model
     even_tps <- seq(min(expression_data[, "LH"]), max(expression_data[, "LH"]), length.out = nrow(expression_data))
-    training_model_results <- .endometrium_ordering(expression_data = expression_data, even_tps = even_tps,
-                                                   genes = genes, gene_window = gene_window, aggregate_window = aggregate_window,
-                                                   spread = 11, euc = 2, decreasing_window = decreasing_window, new_extrap = new_extrap)
+    training_model_results <- .endometrium_ordering(expression_data, genes, even_tps, iteration = 1, gene_window, aggregate_window, euc)
 
     result[["expression_data"]] <- expression_data
     result[["model_results"]] <- training_model_results
 
     if (check_asynchrony) {
         expression_data["LH_rn"] <- training_model_results[, 1]
-        fake_points <- .extrapolation(dat = expression_data, genes = genes, size = gene_window, dp_per_LH = 11)
+        fake_points <- .extrapolate_data(expression_data, genes, gene_window)
         data <- rbind(expression_data[, c("ID", "LH_rn", genes)], fake_points[, c("ID", "LH_rn", genes)])
-        asynchrony <- sapply(expression_data[, "ID"], function(x) {
-            dat <- .all_genes(unknown_sample = x, genes = genes, data_dCT = data, gene_window = gene_window)
+        asynchrony <- sapply(expression_data[, "ID"], function(unknown_sample) {
+            dat <- .all_genes(unknown_sample, genes, data, gene_window)
             .synchrony_bySampleSD(dat, 20)
         })
         x <- 1:length(asynchrony)
@@ -66,9 +55,7 @@ endotime_train <- function(expression_data, genes, batch_correct = TRUE, check_a
         result[["asynchrony_threshold"]] <- threshold
     }
 
-    if (convert_realtime) {
-        result <- .convert_realtime(result)
-    }
+    result <- .convert_realtime(result)
 
     return(result)
 }

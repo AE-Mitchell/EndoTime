@@ -11,11 +11,7 @@ endotime_train(
   check_asynchrony = TRUE,
   gene_window = 80,
   aggregate_window = 80,
-  euc = 2,
-  enforce_monotony = FALSE,
-  decreasing_window = FALSE,
-  new_extrap = FALSE,
-  convert_realtime = TRUE
+  euc = 2
 )
 }
 \arguments{
@@ -32,14 +28,6 @@ endotime_train(
 \item{aggregate_window}{...}
 
 \item{euc}{...}
-
-\item{enforce_monotony}{...}
-
-\item{decreasing_window}{...}
-
-\item{new_extrap}{...}
-
-\item{convert_realtime}{...}
 }
 \value{
 ...

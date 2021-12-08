@@ -6,5 +6,5 @@
         scaled_values <- unlist(c(scaled_values, result))
     }
     names(scaled_values) <- genes
-    return(scaled_values)
+    scaled_values
 }

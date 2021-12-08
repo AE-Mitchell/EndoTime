@@ -17,5 +17,5 @@
 
     current_dens <- stats::dnorm(unknown_expression, l_mean, l_sd)
 
-    return(c(median_LH, current_dens))
+    c(median_LH, current_dens)
 }
