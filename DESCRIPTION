@@ -1,16 +1,21 @@
-Package: EndoTime
-Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Package: endotime
+Title: Endometrial Secretory Phase Assignment Model
+Version: 1.0
+Authors@R: c(
+    person("Andrew", "Mitchell", email = "andrew.e.mitchell@warwick.ac.uk", role = c("aut", "cre")),
+    person("Julia", "Lipecki", role = "ctb"))
+Maintainer: Andrew Mitchell <andrew.e.mitchell@warwick.ac.uk>
+Description: A package for the temporal refinement of endometrial biopsies using an initial
+    timing value as provided via urinary ovulation test and the measurement of expression for
+    a panel of time-sensitive genes. Additionally, EndoTime allows for the quantification of
+    sample 'asynchrony', a value which describes the conformity between the timing estimates
+    provided on a per-gene basis.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Imports:
+Imports: 
     plyr,
     radiant.data,
     segmented,
@@ -21,3 +26,4 @@ Imports:
 Suggests: 
     rmarkdown,
     knitr
+VignetteBuilder: knitr
