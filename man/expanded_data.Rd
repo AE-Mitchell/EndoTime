@@ -7,15 +7,15 @@
 \format{
 A data frame with 257 rows and 9 variables.
 \describe{
-    \item{ID}{Unique biopsy identification}
-    \item{BATCH}{The batch number to which the sample contributed}
-    \item{LH}{The number of days since ovulation, as provided by the donating patient based on the results of urinary ovulation test}
-    \item{CXCL14}{-ΔCT values for CXCL14}
-    \item{DPP4}{-ΔCT values for DPP4}
-    \item{GPX3}{-ΔCT values for GPX3}
-    \item{IGFBP1}{-ΔCT values for IGFBP1}
-    \item{IL2RB}{-ΔCT values for IL2RB}
-    \item{SLC15A2}{-ΔCT values for SLC15A2}
+\item{ID}{Unique biopsy identification}
+\item{BATCH}{The batch number to which the sample contributed}
+\item{LH}{The number of days since ovulation, as provided by the donating patient based on the results of urinary ovulation test}
+\item{CXCL14}{-ΔCT values for CXCL14}
+\item{DPP4}{-ΔCT values for DPP4}
+\item{GPX3}{-ΔCT values for GPX3}
+\item{IGFBP1}{-ΔCT values for IGFBP1}
+\item{IL2RB}{-ΔCT values for IL2RB}
+\item{SLC15A2}{-ΔCT values for SLC15A2}
 }
 }
 \usage{

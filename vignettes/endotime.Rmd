@@ -1,0 +1,96 @@
+---
+title: "Estimating Luteal Phase Endometrial Biopsy Timings with EndoTime"
+author: "Andrew Mitchell"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{endotime}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The human endometrium is a highly dynamic tissue and contemporary thought suggests that a greater understanding of its behaviour throughout the menstrual cycle should benefit the study of reproductive pathologies. Particular focus has been invested into identifying the Window of Implantation (WOI), the inflection point in the menstrual cycle after which the tissue is either maintained in the event of embryo implantation or otherwise shed to later be regrown. The individual phases of the endometrium are associated with substantial tissue remodelling which is particularly intense prior to the WOI and so a regular failure to conceive or a repeated pattern of pregnancy loss is hypothesised to be induced by a misstep in this complex process. However, attempts to investigate this particular phase of the cycle - the luteal phase - are confounded by cellular heterogeneity (Suhorutshenko _et al_, 2018), inter-cycle variability in local immune cells (Brighton _et al_, 2017) and in parsing the rapid changes in gene expression (Wang _et al_, 2020).
+
+Timing endometrial biopsies in order to provide context to their analyses is therefore a difficult prospect. Scheduling relative to pre-ovulatory luteinising hormone (LH) surge is one approach, but one undermined by this point of calibration exhibiting a range of up to four days within a small cohort of women (Tewary _et al_, 2020; Johnson _et al_, 2015; Roos _et al_, 2015). Histographical assessment of biopsies has formed a foundational approach (Noyes _et al_, 1950), though its accuracy has been brought into question (Coutifaris _et al_, 2014; Murray _et al_, 2004). Computational methods based on tissue transcriptomics represent a promising solution and while several pieces of software have been developed, these largely focus on the assessment of tissue receptivity to implantation rather than timing across a continuous domain (D$\'{i}$az-Gimeno _et al_, 2011; Ruiz-Alonso _et al_, 2013; Enciso _et al_, 2013).
+
+EndoTime has been developed in order to address this gap in the available technology for endometrial timing, designed to utilise a panel of six temporal marker genes in order to provide timing estimates that are not limited to categorical appraisal of receptivity.
+
+## Preprocessing of Endometrial Transcriptomic Data
+
+EndoTime currently relies on transcriptomic data generated via RT-qPCR, specifically for the following temporal marker genes:
+
+* C-X-C Motif Chemokine Ligand 14 (_CXCL14_)
+* Dipeptidyl Peptidase 4 (_DPP4_)
+* Glutathione Peroxidase 3 (_GPX3_)
+* Insulin-like Growth Factor Binding Protein 1 (_IGFBP1_)
+* Interleukin 2 Receptor Subunit $\beta$ (_IL2RB_)
+* Solute Carrier Family 15 Member 2 (_SLC15A2_)
+
+Notably, there are no restrictions on the genes applied to EndoTime, though the results of timing estimation utilising an alternative panel are as yet untested.
+
+EndoTime has been developed utilising $\Delta$CT values with _L19_ as the housekeeping gene. Ensuring that raw CT values are suitably converted prior to timing estimation should ensure that modelling proceeds as anticipated.
+
+EndoTime applies four data transformation steps prior to timing estimation:
+
+1. Provisional conversion of initial timings (LH+, as provided via patient-reported urinary ovulation test) from integer values into continuous values.
+2. Inversion of $\Delta$CT values in order to appropriately represent gene expression.
+3. Scaling expression values between a minimum of zero and a maximum of one. This allows for expression characteristics that differ between genes to be compared more easily.
+4. Batch correction of all samples, using all available genes within the dataset. This involves ensuring that each batch is represented by an identical mean.
+
+These steps are applied by EndoTime itself: data supplied by the user need only be unmodified $\Delta$CT values.
+
+## Utilising EndoTime to Provide Timing Estimates
+Application of EndoTime to $\Delta$CT data can be achieved via the `model_endotime()` function in combination with a list of settings to be applied during modelling. Critical to the process is identifying an appropriate size for the data to be subdivided into: larger bins will generate timing estimates that might be over-generalised and aggregate together, while smaller bins might provide estimates that are highly granular and conversely difficult to generalise as well as computationally more expensive. Selection of an appropriate bin size depends on the level of granularity you desire from the timing estimations: thus far, EndoTime has been developed using a bin size of 80.
+
+```{r, eval = FALSE}
+# The training data provided includes RTq-PCR data for the following panel of genes
+panel_genes <- c("GPX3", "SLC15A2", "IL2RB", "CXCL14", "DPP4", "IGFBP1")
+
+# In this instance, we need to perform batch correction on the data, and so set the batch_correction flag to TRUE
+# The window size applied for the computation of gene pseudo-density curves and aggregate pseudo-density curves here is identical,
+# though you may wish to adjust these. EndoTime will then decrease the size by 10 with every iteration, to a minimum of 20
+# The Euclidean distance (euc) value establishes the cutoff for modelling, below which any continued modelling is considered to
+# reach diminishing returns. In this instance, modelling will cease once the euc has fallen below 2
+endotime_model <- endotime_train(training_data, panel_genes, batch_correct = TRUE, check_asynchrony = TRUE,
+                        gene_window = 80, aggregate_window = 80, euc = 2)
+
+```
+
+The resulting object represents output generated by all contributing steps during modelling as well as the estimated biopsy times themselves, which can be retrieved from the above model via `endotime_model$model_results`.
+
+## Assessing Biopsy Asynchrony with EndoTime
+Each gene within the temporal marker panel contributes its own timing estimate to every sample with each iteration. The approach developed for EndoTime presumes synchrony between each of these estimates, whereby all six estimates for a given sample converge upon a single time point. 'Asynchrony' is established as a failure for a sample to meet these expectations and is quantified via an 'asynchrony score' during modelling, with results being retrieved from the model via `endotime_model$asynchronous_scores` and `endotime_model$asynchrony_threshold`.
+
+While asynchrony has yet to be linked to any particular pathology or clinical relevance, asynchronous samples do represent a factor which can complicate modelling. Removal of these samples from the data set is considered as a means to further refine the resulting timing estimates:
+
+```{r, eval = FALSE}
+# Extract asynchrony score for each sample and rank in ascending order
+asynchrony_scores <- endotime_model[["asynchronous_scores"]]
+asynchrony_df <- data.frame("asynchrony_rank" = rank(asynchrony_scores), "asynchrony_score" = asynchrony_scores)
+
+# We can assess these scores visually via ggplot2
+ggplot(asynchrony_df, aes(asynchrony_rank, asynchrony_score)) +
+  geom_point()
+
+```
+
+Asynchrony is assessed manually, with samples exhibiting a considerable deviation from the general trend representing potential candidates for removal from the data set. In this case, we can choose to remove the three samples with the highest asynchrony score before remodelling with EndoTime.
+
+```{r, eval = FALSE}
+# Identify the three samples with asynchrony scores greater than 2.5
+asynchronous_samples <- rownames(asynchrony_df[asynchrony_df[["asynchrony_score"]] > 2.5, ])
+
+# Remove the three samples with asynchrony scores greater than 2.5
+synchronous_data <- training_data[!training_data[["ID"]] %in% asynchronous_samples, ]
+
+# Remodel remaining data
+endotime_model <- endotime_train(synchronous_data, panel_genes, batch_correct = TRUE, check_asynchrony = FALSE,
+                        gene_window = 80, aggregate_window = 80, euc = 2)
+
+```
